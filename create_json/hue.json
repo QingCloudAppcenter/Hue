@@ -1,0 +1,79 @@
+{
+    "app_id": "app-HueXiJ6FpGXUFbAc3duXphrf0CNWNGa1IFFB",
+    "debug": true,
+    "app_version": "3.11.0",
+    "name": "Hue_test",
+    "description": "my hue test",
+    "vxnet": "vxnet-1hiykhg",
+    "links": {
+        "zk_service_2": "cl-amvw1lv8",
+        "hadp_service_1": "cl-fdu9qvx1",
+        "hive_service_1": "cl-393oobug"
+   },
+    "node": [{
+        "role": "hue-server",
+        "container": {
+           "type": "kvm",
+           "image": "img-getzrhp8",
+           "zone": "test"
+        },
+        "count": 1,
+        "cpu": 1,
+        "memory": 1024,
+        "volume": {
+            "size": 5,
+            "mount_point": "/data",
+            "filesystem": "ext4"
+        },
+        "instance_class": 0,
+        "advanced_action": ["change_vxnet", "scale_horizontal"],
+        "service": {
+            "init": {
+                "nodes_to_execute_on": 1,
+                "cmd": "/usr/local/hue/hue_shell.sh init"
+            },
+            "start": {
+                "cmd": "/usr/local/hue/hue_shell.sh start"
+            },
+            "stop": {
+                "cmd": "/usr/local/hue/hue_shell.sh stop"
+            }
+        }
+    },
+    {
+        "role": "spark-client",
+        "container": {
+           "type": "kvm",
+           "image": "img-getzrhp8",
+           "zone": "test"
+        },
+        "count": 0,
+        "cpu": 1,
+        "memory": 2048,
+        "volume": {
+            "size": 5,
+            "mount_point": "/data",
+            "filesystem": "ext4"
+        },
+        "instance_class": 0,
+        "advanced_action": ["change_vxnet", "scale_horizontal"],
+        "service": {
+            "start": {
+                "cmd": "/usr/local/hue/hue_shell.sh spark start"
+            },
+            "stop": {
+                "cmd": "/usr/local/hue/hue_shell.sh spark stop"
+            }
+        }
+    }],
+    "env": {
+        "secret_key": "aszuda123fnkqwe12315urasdf1231ls98ajs12312302",
+        "database": "local", 
+        "database_engine": "mysql",
+        "database_host": "192.168.128.22",
+        "database_port": "3306",
+        "database_user": "user_hue",
+        "database_password": "zhu88jie",
+        "database_name": "database_hue"
+    }
+}

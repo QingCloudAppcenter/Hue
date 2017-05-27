@@ -1,0 +1,50 @@
+{
+    "app_id": "app-HueXiJ6FpGXUFbAc3duXphrf0CNWNGa1IFFB",
+    "debug": true,
+    "app_version": "3.11.0",
+    "name": "MyHue",
+    "description": "my hue test",
+    "vxnet": "vxnet-d5ljz3m",
+    "links": {
+        "zk_service_1": "cl-jobvsl35",
+        "zk_service_2": "cl-jobvsl35",
+        "zk_service_3": "cl-jobvsl35",
+	"hbs_service_1": "cl-a7g93o2h",
+	"hbs_service_2": "cl-a7g93o2h",
+	"spk_service_1": "cl-c8bqi1tu",
+	"hadp_service_1": "cl-b801e2rc"
+   },
+    "node": [{
+        "role": "hue-server",
+        "container": {
+           "type": "kvm",
+           "image": "img-17ucdvld",
+           "zone": "allinone"
+        },
+        "count": 1,
+        "cpu": 1,
+        "memory": 1024,
+        "volume": {
+            "size": 2,
+            "mount_point": "/data",
+            "filesystem": "ext4"
+        },
+        "instance_class": 0,
+        "service": {
+            "init": {
+                "nodes_to_execute_on": 1,
+                "cmd": "/usr/local/hue/hue_shell.sh init"
+            },
+            "start": {
+                "cmd": "/usr/local/hue/hue_shell.sh start"
+            },
+            "stop": {
+                "cmd": "/usr/local/hue/hue_shell.sh stop"
+            }
+        }
+    }],
+    "env": {
+        "secret_key": "aszuda123fnkqwe12315urasdf1231ls98ajs12312302",
+        "database": "local" 
+    }
+}

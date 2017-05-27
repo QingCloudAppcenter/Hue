@@ -1,0 +1,260 @@
+{
+    "app_id": "app-HBasedJodu75sbyek5dmPr7IaPavi2I2zNcb",
+    "app_version": "1.0",
+    "debug": true,
+    "name": "Hue_HBase",
+    "description": "my hbase App",
+    "vxnet": "vxnet-1hiykhg",
+    "links": {
+        "zk_service": "cl-poookeyt"
+    },
+    "node": [{
+        "role": "hbase-master",
+        "container": {
+            "type": "kvm",
+            "image": "img-bzf0t38c",
+            "zone": "test"
+        },
+        "count": 1,
+        "cpu": 1,
+        "memory": 1024,
+        "volume": {
+            "size": 5,
+            "mount_point": "/bigdata1",
+            "filesystem": "ext4",
+            "class": 0
+        },
+        "instance_class": 0,
+        "passphraseless": "ssh-dsa",
+        "advanced_action": ["change_vxnet", "scale_horizontal"],
+        "service": {
+            "start": {
+                "order": 2,
+                "cmd": "chmod +x /opt/hbase/bin/start.sh;USER=root /opt/hbase/bin/start.sh"
+
+            },
+            "stop": {
+                "order": 2,
+                "cmd": "chmod +x /opt/hbase/bin/stop.sh;USER=root /opt/hbase/bin/stop.sh"
+            },
+            "scale_out": {
+                "order": 2,
+                "nodes_to_execute_on": 1,
+                "cmd": "USER=root /opt/hbase/bin/start-hbase.sh"
+            }
+        },
+        "health_check": {
+            "enable": true,
+            "interval_sec": 60,
+            "timeout_sec": 45,
+            "action_timeout_sec": 45,
+            "healthy_threshold": 1,
+            "unhealthy_threshold": 3,
+            "check_script": "chmod +x /opt/hbase/bin/health-check.sh;/opt/hbase/bin/health-check.sh",
+            "action_script": "chmod +x /opt/hbase/bin/health-action.sh;/opt/hbase/bin/health-action.sh"
+        },
+        "monitor": {
+            "enable": true,
+            "script": "chmod +x /opt/hbase/bin/hbase-monitor.sh;/opt/hbase/bin/hbase-monitor.sh",
+            "items": {
+                "ritCount": {
+                    "unit": "region",
+                    "value_type": "int",
+                    "statistics_type": "delta"
+                }
+            },
+            "display": ["ritCount"]
+        }
+    },
+    {
+        "role": "hbase-hdfs-master",
+        "container": {
+            "type": "kvm",
+            "image": "img-yge0hquq",
+            "zone": "test"
+        },
+        "count": 1,
+        "cpu": 1,
+        "memory": 1024,
+        "volume": {
+            "size": 5,
+            "mount_point": "/bigdata1",
+            "filesystem": "ext4",
+            "class": 0
+        },
+        "instance_class": 0,
+        "passphraseless":"ssh-dsa",
+        "advanced_action": ["change_vxnet"],
+        "service": {
+            "init": {
+                "nodes_to_execute_on": 1,
+                "cmd": "mkdir -p /bigdata1/hadoop;/opt/hadoop/bin/hdfs namenode -format"
+            },
+            "start": {
+                "order": 1,
+                "cmd": "USER=root /opt/hadoop/sbin/start-dfs.sh"
+            },
+            "stop": {
+                "order": 1,
+                "cmd": "USER=root /opt/hadoop/sbin/stop-dfs.sh"
+            },
+            "scale_in": {
+                "cmd": "USER=root /opt/hadoop/sbin/exclude-node.sh",
+                "timeout": 86400
+            },
+            "scale_out": {
+                "order": 1,
+                "nodes_to_execute_on": 1,
+                "cmd": "USER=root /opt/hadoop/sbin/start-dfs.sh"
+            }
+        },
+        "health_check": {
+            "enable": true,
+            "interval_sec": 60,
+            "timeout_sec": 45,
+            "action_timeout_sec": 45,
+            "healthy_threshold": 1,
+            "unhealthy_threshold": 3,
+            "check_script": "sh /opt/hadoop/sbin/health-check.sh",
+            "action_script": "sh /opt/hadoop/sbin/health-action.sh"
+        }
+    },
+    {
+        "role": "hbase-slave",
+        "container": {
+            "type": "kvm",
+            "image": "img-bznsfhwn",
+            "zone": "test"
+        },
+        "count": 1,
+        "cpu": 1,
+        "memory": 1024,
+        "advanced_action": ["change_vxnet", "scale_horizontal"],
+        "volume": {
+            "size": 5,
+            "mount_point": ["/bigdata1", "/bigdata2", "/bigdata3"],
+            "filesystem": "ext4",
+            "class": 0
+        },
+        "service": {
+            "stop": {
+                "order": 3,
+                "cmd": "USER=root /opt/hbase/bin/hbase-daemon.sh stop regionserver"
+            },
+            "scale_out": {
+                "cmd": "USER=root /opt/hadoop/sbin/start-hadoop-slave.sh;USER=root /opt/hbase/bin/start-regionserver.sh"
+            }
+        },
+        "health_check": {
+            "enable": true,
+            "interval_sec": 60,
+            "timeout_sec": 45,
+            "action_timeout_sec": 45,
+            "healthy_threshold": 1,
+            "unhealthy_threshold": 3,
+            "check_script": "sh /opt/hbase/bin/health-check.sh",
+            "action_script": "sh /opt/hbase/bin/health-action.sh"
+        },
+        "monitor": {
+            "enable": true,
+            "script": "/opt/hbase/bin/hbase-monitor.sh",
+            "items": {
+                "readRequestCount": {
+                    "unit": "number per second",
+                    "value_type": "int",
+                    "statistics_type": "rate"
+                },
+                "writeRequestCount": {
+                    "unit": "number per second",
+                    "value_type": "int",
+                    "statistics_type": "rate"
+                },
+                "blockCacheHitCount": {
+                    "unit": "number",
+                    "value_type": "int",
+                    "statistics_type": "delta"
+                },
+                "blockCacheCountHitPercent": {
+                    "unit": "%",
+                    "value_type": "int",
+                    "statistics_type": "latest",
+                    "scale_factor_when_display": 100
+                },
+                "slowDeleteCount": {
+                    "unit": "number",
+                    "value_type": "int",
+                    "statistics_type": "delta"
+                },
+                "slowIncrementCount": {
+                    "unit": "number",
+                    "value_type": "int",
+                    "statistics_type": "delta"
+                },
+                "slowGetCount": {
+                    "unit": "number",
+                    "value_type": "int",
+                    "statistics_type": "delta"
+                },
+                "slowAppendCount": {
+                    "unit": "number",
+                    "value_type": "int",
+                    "statistics_type": "delta"
+                },
+                "slowPutCount": {
+                    "unit": "number",
+                    "value_type": "int",
+                    "statistics_type": "delta"
+                },
+                "GcTimeMillisConcurrentMarkSweep": {
+                    "unit": "ms",
+                    "value_type": "int",
+                    "statistics_type": "delta"
+                }
+            },
+            "groups": {
+                "RequestCount": ["readRequestCount", "writeRequestCount"],
+                "SlowCount": ["slowDeleteCount", "slowIncrementCount", "slowGetCount", "slowAppendCount", "slowPutCount"]
+            },
+            "display": ["blockCacheHitCount", "blockCacheCountHitPercent", "RequestCount", "SlowCount", "GcTimeMillisConcurrentMarkSweep"]
+        }
+    }],
+    "env": {
+        "fs.trash.interval": 1440,
+        "dfs.replication": 2,
+        "dfs.namenode.handler.count": 10,
+        "dfs.datanode.handler.count": 10,
+        "hbase.regionserver.handler.count": 30,
+        "zookeeper.session.timeout": 60000,
+        "hbase.hregion.majorcompaction": 0,
+        "hbase.hstore.blockingStoreFiles": 1000000,
+        "hbase.regionserver.optionalcacheflushinterval": 0,
+        "hfile.block.cache.size": 0.4,
+        "hfile.index.block.max.size": 131072,
+        "hbase.hregion.max.filesize": 10737418240,
+        "hbase.master.logcleaner.ttl": 600000,
+        "hbase.ipc.server.callqueue.handler.factor": 0.1,
+        "hbase.ipc.server.callqueue.read.ratio": 0,
+        "hbase.ipc.server.callqueue.scan.ratio": 0,
+        "hbase.regionserver.msginterval": 3000,
+        "hbase.regionserver.logroll.period": 3600000,
+        "hbase.regionserver.regionSplitLimit": 1000,
+        "hbase.balancer.period": 300000,
+        "hbase.regions.slop": 0.001,
+        "io.storefile.bloom.block.size": 131072,
+        "hbase.rpc.timeout": 60000,
+        "hbase.column.max.version": 1,
+        "hbase.security.authorization": "true",
+        "qingcloud.hbase.major.compact.hour": 3,
+        "qingcloud.phoenix.on.hbase.enable": "false",
+        "phoenix.functions.allowUserDefinedFunctions": "false",
+        "phoenix.transactions.enabled": "false"
+    },
+    "endpoint": {
+        "rest_port": {
+            "port": 8000
+        },
+        "thrift_port": {
+            "port": 9090
+        }
+    }
+}

@@ -1,0 +1,7 @@
+[template]
+src = "oozie-site.xml.tmpl"
+dest = "/usr/local/oozie/conf/oozie-site.xml"
+keys = [
+    "/",
+]
+reload_cmd = "/usr/local/hue/hue_shell.sh oozie restart"

@@ -1,0 +1,114 @@
+{
+  "app_id": "app-SparkF95jpqCMb7sYRaJ7lvPzyAxpRxSw2yL",
+  "app_version": "1.0",
+  "name": "Hue_Spark",
+  "vxnet": "vxnet-1hiykhg",
+  "node": [{
+     "role": "spark-master",
+     "container": {
+        "type": "kvm",
+        "image": "img-skhdp16m",
+        "zone": "test"
+     },
+     "count": 1,
+     "cpu": 1,
+     "memory": 1024,
+     "volume": {
+            "size": 5,
+            "mount_point": "/bigdata1",
+            "filesystem": "ext4",
+            "class": 0
+     },
+     "instance_class": 0,
+     "passphraseless": "ssh-dsa",
+     "service": {
+        "start": {
+           "cmd": "USER=root /opt/spark/sbin/start-all.sh"
+        },
+        "stop": {
+           "cmd": "USER=root /opt/spark/sbin/stop-all.sh"
+        }
+     }
+  },
+  {
+     "role": "hadoop-master",
+     "container": {
+        "type": "kvm",
+        "image": "img-hdp260-m",
+        "zone": "test"
+     },
+     "count": 1,
+     "cpu": 1,
+     "memory": 1024,
+     "volume": {
+        "size": 5,
+        "mount_point": "/bigdata1",
+        "filesystem": "xfs",
+        "class": 0
+     },
+     "instance_class": 0,
+     "passphraseless":"ssh-dsa",
+     "service": {
+        "init": {
+           "cmd": "mkdir -p /bigdata1/hadoop;/opt/hadoop/bin/hdfs namenode -format"
+        },
+        "start": {
+           "cmd": "USER=root /opt/hadoop/sbin/start-dfs.sh"
+        },
+        "stop": {
+           "cmd": "USER=root /opt/hadoop/sbin/stop-dfs.sh"
+        },
+        "scale_in": {
+           "cmd": "USER=root /opt/hadoop/sbin/exclude-node.sh",
+           "timeout": 86400
+        }
+     }
+  },
+  {
+     "role": "worker",
+     "container": {
+        "type": "kvm",
+        "image": "img-skhdp16w",
+        "zone": "test"
+     },
+     "count": 1,
+     "cpu": 1,
+     "memory": 1024,
+     "volume": {
+        "size": 8,
+        "mount_point": ["/bigdata1", "/bigdata2", "/bigdata3", "/bigdata4"],
+        "filesystem": "ext4",
+        "class": 0
+     },
+     "instance_class": 0
+  }],
+  "env": {
+     "dfs.datanode.handler.count": 10,
+     "dfs.namenode.handler.count": 10,
+     "dfs.replication": 2,
+     "fs.trash.interval": 1440
+  },
+  "advanced_action": ["change_vxnet", "scale_horizontal"],
+  "endpoint": {
+      "hdfs.client_port": {
+        "port":9000,
+        "protocol": "tcp"
+      },
+      "hdfs.monitor_port": {
+        "port":50070,
+        "protocol": "http"
+      },
+      "spark.client_port": {
+        "port":7077,
+        "protocol": "tcp"
+      },
+      "spark.monitor_port": {
+        "port":8080,
+        "protocol": "http"
+      },
+      "spark.driver_port": {
+        "port":4040,
+        "protocol": "http"
+      }
+  }
+}

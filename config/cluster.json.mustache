@@ -1,0 +1,71 @@
+    {
+        "name": {{cluster.name}},
+        "description": {{cluster.description}},
+        "vxnet": {{cluster.vxnet}},
+        "nodes": [{
+            "role": "hue-server",
+            "container": {
+               "type": "kvm",
+               "zone": "test",
+               "image": "img-au7oo6mz"
+            },
+            "count": {{cluster.hue-server.count}},
+            "cpu": {{cluster.hue-server.cpu}},
+            "memory": {{cluster.hue-server.memory}},
+            "volume": {
+                "size": {{cluster.hue-server.volume_size}},
+                "mount_point": "/data",
+                "filesystem": "ext4"
+            },
+            "instance_class": {{cluster.hue-server.instance_class}},
+            "advanced_actions": ["change_vxnet", "scale_horizontal"],
+            "services": {
+                "init": {
+                    "cmd": "/usr/local/hue/hue_shell.sh init"
+                },
+                "start": {
+                    "cmd": "/usr/local/hue/hue_shell.sh start"
+                },
+                "stop": {
+                    "cmd": "/usr/local/hue/hue_shell.sh stop"
+                }
+            }
+        },
+        {
+            "role": "spark-client", 
+            "container": {
+               "zone": "test",
+               "type": "kvm",
+               "image": "img-au7oo6mz"
+            },
+            "count": {{cluster.spark-client.count}},
+            "cpu": {{cluster.spark-client.cpu}},
+            "memory": {{cluster.spark-client.memory}},
+            "volume": {
+                "size": {{cluster.spark-client.volume_size}},
+                "mount_point": "/data",
+                "filesystem": "ext4"
+            },
+            "instance_class": {{cluster.spark-client.instance_class}},
+            "advanced_actions": ["change_vxnet", "scale_horizontal"],
+            "services": {
+                "start": {
+                    "cmd": "/usr/local/hue/hue_shell.sh spark start"
+                },
+                "stop": {
+                    "cmd": "/usr/local/hue/hue_shell.sh spark stop"
+                }
+            }
+        }],
+        "metadata_root_access": true,
+        "env": {
+            "secret_key": {{env.secret_key}},
+            "database": {{env.database}}, 
+            "database_engine": {{env.database_engine}},
+            "database_host": {{env.database_host}},
+            "database_port": {{env.database_port}},
+            "database_user": {{env.database_user}},
+            "database_password": {{env.database_password}},
+            "database_name": {{env.database_name}}
+        }
+    }

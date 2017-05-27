@@ -1,0 +1,7 @@
+[template]
+src = "core-site.xml.tmpl"
+dest = "/usr/local/hadoop/etc/hadoop/core-site.xml"
+keys = [
+    "/",
+]
+reload_cmd = "/usr/local/hue/hue_shell.sh oozie restart"
