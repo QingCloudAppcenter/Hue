@@ -80,59 +80,6 @@
                 "step": 10,
                 "required":"yes"
             }]
-        },
-        {
-            "key": "spark-client",
-            "description": "extra instance for spark client service",
-            "label": "spark-client",
-            "type": "array",
-            "properties": [{
-                "key": "count",
-                "label": "count",
-                "description": "Number of nodes for the cluster to create",
-                "type": "integer",
-                "default": 0,
-                "range": [0,1],
-                "required": "yes"
-            },
-            {
-                "key": "cpu",
-                "label": "CPU",
-                "description": "CPUs of each node",
-                "type": "integer",
-                "default": 2,
-                "range": [1,2,4,8,12,16],
-                "required": "yes"
-            },
-            {
-                "key": "memory",
-                "label": "Memory",
-                "description": "memory of each node (in MB)",
-                "type": "integer",
-                "default": 4096,
-                "range": [1024,2048,4096,8192,16384,32768],
-                "required": "yes"
-            },
-            {
-                "key": "instance_class",
-                "label": "instance class",
-                "description":"The instance type for the cluster to run, such as high performance, high performance plus",
-                "type":"integer",
-                "default":0,
-                "range": [0,1],
-                "required":"yes"
-            },
-            {
-                "key": "volume_size",
-                "label": "volume size",
-                "description":"The volume size for each instance",
-                "type":"integer",
-                "default":10,
-                "min": 10,
-                "max": 1000,
-                "step": 10,
-                "required":"yes"
-            }]
         }]
     },
     {
@@ -148,9 +95,78 @@
             "required":"yes"
         },
         {
+            "key": "hadoop_app_id",
+            "label": "hadoop_app_id",
+            "description": "The hadoop app id in use, the default value is set of QingCloud hadoop app id",
+            "type": "string",
+            "range": ["app-53ajfmsy", "none"],
+            "default": "app-53ajfmsy",
+            "required":"no"
+        },
+        {
+            "key": "hadoop_cluster_id",
+            "label": "hadoop_cluster_id",
+            "description": "The default hadoop cluster id in hue. if it is blank, it will choose the first hadoop_app_id cluster created in vxnet",
+            "type": "string",
+            "default": "",
+            "required":"no"
+        },
+        {
+            "key": "zookeeper_app_id",
+            "label": "zookeeper_app_id",
+            "description": "The zookeeper app id in use, the default value is set of QingCloud zookeeper app id",
+            "type": "string",
+            "range": ["app-tg3lbp0a", "none"],
+            "default": "app-tg3lbp0a",
+            "required":"no"
+        },
+        {
+            "key": "spark_app_id",
+            "label": "spark_app_id",
+            "description": "The spark app id in use, the default value is set of QingCloud spark app id",
+            "type": "string",
+            "range": ["none"],
+            "default": "none",
+            "required":"no"
+        },
+        {
+            "key": "spark_cluster_id",
+            "label": "spark_cluster_id",
+            "description": "The default spark cluster id in hue. if it is blank, it will choose the first spark_app_id cluster created in vxnet",
+            "type": "string",
+            "default": "",
+            "required":"no"
+        },
+        {
+            "key": "hive_app_id",
+            "label": "hive_app_id",
+            "description": "The hive app id in use, the default value is set of QingCloud hive app id",
+            "type": "string",
+            "range": ["none"],
+            "default": "none",
+            "required":"no"
+        },
+        {
+            "key": "hive_cluster_id",
+            "label": "hive_cluster_id",
+            "description": "The default hive cluster id in hue. if it is blank, it will choose the first hive_app_id cluster created in vxnet",
+            "type": "string",
+            "default": "",
+            "required":"no"
+        },
+        {
+            "key": "hbase_app_id",
+            "label": "hbase_app_id",
+            "description": "The hbase app id in use, the default value is set of QingCloud hbase app id",
+            "type": "string",
+            "range": ["none"],
+            "default": "none",
+            "required":"no"
+        },
+        {
             "key": "database",
             "label": "database",
-            "description": "The Hive MetaStore Database",
+            "description": "The hue metadata database",
             "type": "string",
             "default": "local",
             "range": ["local", "remote"],
@@ -159,7 +175,7 @@
         {
             "key": "database_engine",
             "label": "database_engine",
-            "description": "The Engine of MetaStore Database",
+            "description": "The engine of matadata database",
             "type": "string",
             "default": "mysql",
             "range": ["mysql"],
@@ -168,7 +184,7 @@
         {
             "key": "database_name",
             "label": "database_name",
-            "description": "The Hive MetaStore Database Name",
+            "description": "The hue metadata database name",
             "type": "string",
             "default": "",
             "required":"no"
@@ -176,7 +192,7 @@
         {
             "key": "database_host",
             "label": "database_host",
-            "description": "The Hive MetaStore Database Host",
+            "description": "The hue metadata database host",
             "type": "string",
             "default": "",
             "required":"no"
@@ -184,7 +200,7 @@
         {
             "key": "database_port",
             "label": "database_port",
-            "description": "The Hive MetaStore Database Port",
+            "description": "The hue metadata database port",
             "type": "string",
             "default": "",
             "required":"no"
@@ -192,7 +208,7 @@
         {
             "key": "database_user",
             "label": "database_user",
-            "description": "The Hive MetaStore Database User",
+            "description": "The hue metadata database user",
             "type": "string",
             "default": "",
             "required":"no"
@@ -200,7 +216,7 @@
         {
             "key": "database_password",
             "label": "database_password",
-            "description": "The Hive MetaStore Database Password",
+            "description": "The hue metadata database password",
             "type": "string",
             "default": "",
             "required":"no"

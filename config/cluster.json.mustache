@@ -6,8 +6,8 @@
             "role": "hue-server",
             "container": {
                "type": "kvm",
-               "zone": "test",
-               "image": "img-au7oo6mz"
+               "zone": "pek3a",
+               "image": "img-m90q7izj"
             },
             "count": {{cluster.hue-server.count}},
             "cpu": {{cluster.hue-server.cpu}},
@@ -29,37 +29,29 @@
                 "stop": {
                     "cmd": "/usr/local/hue/hue_shell.sh stop"
                 }
-            }
-        },
-        {
-            "role": "spark-client", 
-            "container": {
-               "zone": "test",
-               "type": "kvm",
-               "image": "img-au7oo6mz"
             },
-            "count": {{cluster.spark-client.count}},
-            "cpu": {{cluster.spark-client.cpu}},
-            "memory": {{cluster.spark-client.memory}},
-            "volume": {
-                "size": {{cluster.spark-client.volume_size}},
-                "mount_point": "/data",
-                "filesystem": "ext4"
-            },
-            "instance_class": {{cluster.spark-client.instance_class}},
-            "advanced_actions": ["change_vxnet", "scale_horizontal"],
-            "services": {
-                "start": {
-                    "cmd": "/usr/local/hue/hue_shell.sh spark start"
-                },
-                "stop": {
-                    "cmd": "/usr/local/hue/hue_shell.sh spark stop"
-                }
+            "health_check": {
+                "enable": true,
+                "interval_sec": 60,
+                "timeout_sec": 10,
+                "action_timeout_sec": 30,
+                "healthy_threshold": 3,
+                "unhealthy_threshold": 3,
+                "check_cmd": "/usr/local/hue/hue_shell.sh status",
+                "action_cmd": "/usr/local/hue/hue_shell.sh start"
             }
         }],
         "metadata_root_access": true,
         "env": {
             "secret_key": {{env.secret_key}},
+            "hadoop_app_id": {{env.hadoop_app_id}},
+            "hadoop_cluster_id": {{env.hadoop_cluster_id}},
+            "zookeeper_app_id": {{env.zookeeper_app_id}},
+            "spark_app_id": {{env.spark_app_id}},
+            "spark_cluster_id": {{env.spark_cluster_id}},
+            "hive_app_id": {{env.hive_app_id}},
+            "hive_cluster_id": {{env.hive_cluster_id}},
+            "hbase_app_id": {{env.hbase_app_id}},
             "database": {{env.database}}, 
             "database_engine": {{env.database_engine}},
             "database_host": {{env.database_host}},

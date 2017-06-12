@@ -1,0 +1,6 @@
+[template]
+src = "hue_shell.sh.tmpl"
+dest = "/usr/local/hue/hue_shell.sh"
+keys = [
+    "/",
+]

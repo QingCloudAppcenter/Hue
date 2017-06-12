@@ -1,8 +1,8 @@
-{{$hadoop_appid := "app-pjklag9v"}}
-{{$zookeeper_appid := "appv-h0zx72bm"}}
-{{$spark_appid := "appv-h0zx72bm"}}
-{{$hive_appid := "appv-h0zx72bm"}}
-{{$hbase_appid := "appv-h0zx72bm"}}
+{{$hadoop_app_id := getv "/self/env/hadoop_app_id"}}
+{{$zookeeper_app_id := getv "/self/env/zookeeper_app_id"}}
+{{$spark_appid := getv "/self/env/spark_app_id"}}
+{{$hive_appid := getv "/self/env/hive_app_id"}}
+{{$hbase_appid := getv "/self/env/hbase_app_id"}}
 # Hue configuration file
 # ===================================
 #
@@ -31,7 +31,7 @@
 
   # Webserver listens on this address and port
   http_host=0.0.0.0
-  http_port=8888
+  http_port=80
 
   # Time zone name
   time_zone=America/Los_Angeles
@@ -58,11 +58,11 @@
   ## django_email_backend=django.core.mail.backends.smtp.EmailBackend
 
   # Webserver runs as this user
-  ## server_user=hue
-  ## server_group=hue
+  server_user=yunify
+  server_group=yunify
 
   # This should be the Hue admin and proxy user
-  ## default_user=hue
+  default_user=yunify
 
   # This should be the hadoop cluster admin
   default_hdfs_superuser=root
@@ -161,7 +161,7 @@
   # Comma separated list of apps to not load at server startup.
   # e.g.: pig,zookeeper
 
-  app_blacklist=pig,impala,solr,sqoop{{if len (gets "/clusters/*/cluster/app_id" | filter $zookeeper_appid)}}{{else}}{{printf ",zookeeper"}}{{end}}{{if len (gets "/clusters/*/cluster/app_id" | filter $hbase_appid)}}{{else}}{{printf ",hbase"}}{{end}}{{if (gets "/clusters/*/cluster/app_id" | filter $hadoop_appid)}}{{else}}{{printf ",hadoop"}}{{end}}{{if len (gets "/clusters/*/cluster/app_id" | filter $spark_appid)}}{{else}}{{printf ",spark"}}{{end}}
+  app_blacklist=pig,impala,solr,sqoop{{if len (gets "/clusters/*/cluster/app_id" | filter $zookeeper_app_id)}}{{else}}{{printf ",zookeeper"}}{{end}}{{if len (gets "/clusters/*/cluster/app_id" | filter $hbase_appid)}}{{else}}{{printf ",hbase"}}{{end}}{{if (gets "/clusters/*/cluster/app_id" | filter $hadoop_app_id)}}{{else}}{{printf ",hadoop"}}{{end}}{{if len (gets "/clusters/*/cluster/app_id" | filter $spark_appid)}}{{else}}{{printf ",spark"}}{{end}}
 
   # Choose whether to show the new SQL editor.
   ## use_new_editor=true
@@ -752,14 +752,26 @@
   # ------------------------------------------------------------------------
   [[hdfs_clusters]]
     # HA support by using HttpFs
-
-    {{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $hadoop_appid}}
+    {{if len (gets "/clusters/*/cluster/app_id" | filter $hadoop_app_id)}}
+    {{else}}
+    [[[default]]]
+    {{end}}
+    {{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $hadoop_app_id}}
       {{$string := split .Key "/"}}
       {{$cluster_id := (index $string 2)}}
-      {{if eq $i 0}}
+      {{$env_cluster_id := getv "/self/env/hadoop_cluster_id"}}
+      {{if eq $env_cluster_id ""}}
+        {{if eq $i 0}}
     [[[default]]]
+        {{else}}
+    [[[{{replace $cluster_id "-" "_" -1}}]]]
+        {{end}}
       {{else}}
-    [[[{{$cluster_id}}]]]
+        {{if eq $cluster_id $env_cluster_id}}
+    [[[default]]]
+        {{else}}
+    [[[{{replace $cluster_id "-" "_" -1}}]]]
+        {{end}}
       {{end}}
       {{range $node_name := lsdir (printf "/clusters/%s/hosts/hdfs-master/" $cluster_id)}}
       {{$hdfs_ip := getv (printf "/clusters/%s/hosts/hdfs-master/%s/ip" $cluster_id $node_name)}}
@@ -791,14 +803,26 @@
   # Configuration for YARN (MR2)
   # ------------------------------------------------------------------------
   [[yarn_clusters]]
-
-    {{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $hadoop_appid}}
+    {{if len (gets "/clusters/*/cluster/app_id" | filter $hadoop_app_id)}}
+    {{else}}
+    [[[default]]]
+    {{end}}
+    {{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $hadoop_app_id}}
       {{$string := split .Key "/"}}
       {{$cluster_id := (index $string 2)}}
-      {{if eq $i 0}}
+      {{$env_cluster_id := getv "/self/env/hadoop_cluster_id"}}
+      {{if eq $env_cluster_id ""}}
+        {{if eq $i 0}}
     [[[default]]]
+        {{else}}
+    [[[{{replace $cluster_id "-" "_" -1}}]]]
+        {{end}}
       {{else}}
-    [[[{{$cluster_id}}]]]
+        {{if eq $cluster_id $env_cluster_id}}
+    [[[default]]]
+        {{else}}
+    [[[{{replace $cluster_id "-" "_" -1}}]]]
+        {{end}}
       {{end}}
       {{range $node_name := lsdir (printf "/clusters/%s/hosts/yarn-master/" $cluster_id)}}
       {{$yarn_ip := getv (printf "/clusters/%s/hosts/yarn-master/%s/ip" $cluster_id $node_name)}}
@@ -1270,16 +1294,16 @@
       # Name of Kerberos principal when using security.
       ## principal_name=zookeeper
     
-    {{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $zookeeper_appid}}
+    {{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $zookeeper_app_id}}
       {{$string := split .Key "/"}}
       {{$cluster_id := (index $string 2)}}
-    [[[Zookeeper_{{$cluster_id}}]]]
+    [[[{{replace $cluster_id "-" "_" -1}}]]]
       {{if exists (printf "/clusters/%s/cluster/endpoints/zookeeper" $cluster_id)}}{{$port := getv (printf "/clusters/%s/cluster/endpoints/zookeeper/port" $cluster_id)}}
         host_ports={{range $i, $host := ls (printf "/clusters/%s/hosts" $cluster_id)}}{{$ip := printf "/clusters/%s/hosts/%s/ip" $cluster_id $host}}{{if $i}},{{end}}{{getv $ip}}:{{$port}}{{end}}
       {{else}}
         host_ports={{range $i, $host := ls (printf "/clusters/%s/hosts" $cluster_id)}}{{$ip := printf "/clusters/%s/hosts/%s/ip" $cluster_id $host}}{{if $i}},{{end}}{{getv $ip}}:2181{{end}}
       {{end}}
-      {{if exists (printf "/clusters/%s/cluster/endpoints/rest" $cluster_id)}}{{$port := getv (printf "/clusters/%s/cluster/endpoints/rest/port" $cluster_id)}}
+      {{if exists (printf "/clusters/%s/cluster/endpoints/rest/port" $cluster_id)}}{{$port := getv (printf "/clusters/%s/cluster/endpoints/rest/port" $cluster_id)}}
         {{range $i, $host := ls (printf "/clusters/%s/hosts" $cluster_id)}}
           {{if eq $i 0}}
             {{$ip := getv (printf "/clusters/%s/hosts/%s/ip" $cluster_id $host)}}
