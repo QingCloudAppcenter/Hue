@@ -142,8 +142,8 @@
             "label": "hive_app_id",
             "description": "The hive app id in use, the default value is set of QingCloud hive app id",
             "type": "string",
-            "range": ["none"],
-            "default": "none",
+            "range": ["app-98fu0tes", "none"],
+            "default": "app-98fu0tes",
             "required":"no"
         },
         {

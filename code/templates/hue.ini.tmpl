@@ -1,8 +1,8 @@
 {{$hadoop_app_id := getv "/self/env/hadoop_app_id"}}
 {{$zookeeper_app_id := getv "/self/env/zookeeper_app_id"}}
-{{$spark_appid := getv "/self/env/spark_app_id"}}
-{{$hive_appid := getv "/self/env/hive_app_id"}}
-{{$hbase_appid := getv "/self/env/hbase_app_id"}}
+{{$spark_app_id := getv "/self/env/spark_app_id"}}
+{{$hive_app_id := getv "/self/env/hive_app_id"}}
+{{$hbase_app_id := getv "/self/env/hbase_app_id"}}
 # Hue configuration file
 # ===================================
 #
@@ -161,7 +161,7 @@
   # Comma separated list of apps to not load at server startup.
   # e.g.: pig,zookeeper
 
-  app_blacklist=pig,impala,solr,sqoop{{if len (gets "/clusters/*/cluster/app_id" | filter $zookeeper_app_id)}}{{else}}{{printf ",zookeeper"}}{{end}}{{if len (gets "/clusters/*/cluster/app_id" | filter $hbase_appid)}}{{else}}{{printf ",hbase"}}{{end}}{{if (gets "/clusters/*/cluster/app_id" | filter $hadoop_app_id)}}{{else}}{{printf ",hadoop"}}{{end}}{{if len (gets "/clusters/*/cluster/app_id" | filter $spark_appid)}}{{else}}{{printf ",spark"}}{{end}}
+  app_blacklist=pig,impala,solr,sqoop{{if len (gets "/clusters/*/cluster/app_id" | filter $zookeeper_app_id)}}{{else}}{{printf ",zookeeper"}}{{end}}{{if len (gets "/clusters/*/cluster/app_id" | filter $hbase_app_id)}}{{else}}{{printf ",hbase"}}{{end}}{{if (gets "/clusters/*/cluster/app_id" | filter $hadoop_app_id)}}{{else}}{{printf ",hadoop"}}{{end}}{{if len (gets "/clusters/*/cluster/app_id" | filter $spark_app_id)}}{{else}}{{printf ",spark"}}{{end}}
 
   # Choose whether to show the new SQL editor.
   ## use_new_editor=true
@@ -654,7 +654,7 @@
   [[interpreters]]
     # Define the name and how to connect and execute the language.
 
-{{if len (gets "/clusters/*/cluster/app_id" | filter $hive_appid)}}
+{{if len (gets "/clusters/*/cluster/app_id" | filter $hive_app_id)}}
     [[[hive]]]
       # The name of the snippet.
       name=Hive
@@ -670,7 +670,7 @@
     #   name=SparkSql
     #   interface=hiveserver2
 
-{{if len (gets "/clusters/*/cluster/app_id" | filter $spark_appid)}}
+{{if len (gets "/clusters/*/cluster/app_id" | filter $spark_app_id)}}
     [[[spark]]]
       name=Scala
       interface=livy
@@ -921,22 +921,19 @@
   # Host where HiveServer2 is running.
   # If Kerberos security is enabled, use fully-qualified domain name (FQDN).
  
-{{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $hive_appid}}
+{{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $hive_app_id}}
   {{$string := split .Key "/"}}
   {{$cluster_id := (index $string 2)}}
-  {{if eq $i 0}}
-    {{if ls (printf "/clusters/%s/hosts/hive-hiveserver2/" $cluster_id)}}
-      {{range $dir := lsdir (printf "/clusters/%s/hosts/hive-hiveserver2/" $cluster_id)}}{{$ip := printf "/clusters/%s/hosts/hive-hiveserver2/%s/ip" $cluster_id $dir}}
-    hive_server_host={{getv $ip}}{{end}}
-    {{else}}
+  {{$env_cluster_id := getv "/self/env/hive_cluster_id"}}
+  {{if or (and (ne $env_cluster_id "") (eq $cluster_id $env_cluster_id) ) (and (eq $env_cluster_id "") (eq $i 0) )}}
       {{range $dir := lsdir (printf "/clusters/%s/hosts/hive-server/" $cluster_id)}}{{$ip := printf "/clusters/%s/hosts/hive-server/%s/ip" $cluster_id $dir}}
-    hive_server_host={{getv $ip}}{{end}}
-    {{end}}
-    {{if exists (printf "/clusters/%s/cluster/endpoints/hiveserver2" $cluster_id)}}{{$port := getv (printf "/clusters/%s/cluster/endpoints/hiveserver2/port"   $cluster_id)}}
+    hive_server_host={{getv $ip}}
+      {{end}}
+      {{if exists (printf "/clusters/%s/cluster/endpoints/hiveserver2/port" $cluster_id)}}{{$port := getv (printf "/clusters/%s/cluster/endpoints/hiveserver2/port"   $cluster_id)}}
     hive_server_port={{$port}}
-    {{else}}
+      {{else}}
     hive_server_port=10000
-    {{end}}
+      {{end}}
   {{end}}
 {{end}}
   ## hive_server_host=localhost
@@ -1050,7 +1047,7 @@
 ###########################################################################
 
 [spark]
-{{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $spark_appid}}
+{{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $spark_app_id}}
   {{$string := split .Key "/"}}
   {{$cluster_id := (index $string 2)}}
   {{if eq $i 0}}
@@ -1172,7 +1169,7 @@
   # Comma-separated list of HBase Thrift servers for clusters in the format of '(name|host:port)'.
   # Use full hostname with security.
   # If using Kerberos we assume GSSAPI SASL, not PLAIN.
-  hbase_clusters={{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $hbase_appid}}{{$string := split .Key "/"}}{{$cluster_id := (index $string 2)}}{{$port := getv (printf "/clusters/%s/endpoint/thrift_port/port" $cluster_id)}}{{if $i}}{{printf ","}}{{end}}{{range $j, $host := lsdir (printf "/clusters/%s/hosts/hbase-master" $cluster_id)}}{{$ip := getv (printf "/clusters/%s/hosts/hbase-master/%s/ip" $cluster_id $host)}}{{if eq $j 0}}{{printf "(Hbase_%s|%s:%s)" $cluster_id $ip $port}}{{end}}{{end}}{{end}}
+  hbase_clusters={{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $hbase_app_id}}{{$string := split .Key "/"}}{{$cluster_id := (index $string 2)}}{{$port := getv (printf "/clusters/%s/endpoint/thrift_port/port" $cluster_id)}}{{if $i}}{{printf ","}}{{end}}{{range $j, $host := lsdir (printf "/clusters/%s/hosts/hbase-master" $cluster_id)}}{{$ip := getv (printf "/clusters/%s/hosts/hbase-master/%s/ip" $cluster_id $host)}}{{if eq $j 0}}{{printf "(Hbase_%s|%s:%s)" $cluster_id $ip $port}}{{end}}{{end}}{{end}}
 
   ## hbase_clusters=(Cluster|localhost:9090)
   # HBase configuration directory, where hbase-site.xml is located.

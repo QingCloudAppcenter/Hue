@@ -17,28 +17,11 @@ role={{printf "\"%s\"" $role}}
     {{end}} 
     {{end}}
 {{end}}
-server_name_str=(
-"database"
-"oozie"
-)
-section_str=(
-"^\s*\[\[database\]\]"
-"^\[oozie\]"
-)
-for((index=0;index<${#server_name_str[*]};index++));do 
-    server_name=${server_name_str[$index]}
-    section=${section_str[$index]}
-    eval ${server_name}_server=0
-    if egrep $section $CONF_DIR/hue.ini -A 50 | grep "^\s*# ${server_name}_server_local" >& /dev/null;then
-        eval ${server_name}_server=1
-        if egrep $section $CONF_DIR/hue.ini -A 50 | grep "^\s*# ${server_name}_server_local=true" >& /dev/null;then
-            eval ${server_name}_server_local=1
-        else
-            eval ${server_name}_server_local=0
-        fi
-    fi
-done
-
+{{if eq (getv "/self/env/database") "remote"}}
+database_server_local=0
+{{else}}
+database_server_local=1
+{{end}}
 init_database() {
     if [ $database_server_local -eq 1 ];then
         if [ -e "$MYSQL_DATA" ]; then
@@ -59,8 +42,9 @@ start_database() {
             sudo -u ubuntu service mysql.server start >& /dev/null
             run=$?
             if [ $run -ne 0 ];then
-                return $run
+                echo "start database error!"
             fi
+            return $run
         fi
     fi
 }
@@ -69,8 +53,9 @@ stop_database() {
         sudo -u ubuntu service mysql.server stop >& /dev/null
         run=$?
         if [ $run -ne 0 ];then
-            return $run
+            echo "stop database error!"
         fi
+        return $run
     else
 	    return 0
     fi
@@ -129,7 +114,6 @@ start_hue() {
     if test -r $PID; then
         if kill -0 `cat $PID` > /dev/null 2>&1; then
             echo "command running as process `cat $PID`.  Stop it first."
-            exit 1
         else
             rm $PID*
         fi
@@ -151,7 +135,7 @@ start_hue() {
 	        echo "Success."
 	    else
 	        echo "Start Hue Timeout."
-	        exit 1
+	        return 1
         fi
     fi
 }
@@ -175,43 +159,75 @@ stop_hue() {
 	            echo "Success."
 	        else
 	            echo "Stop Hue Timeout."
-	            exit 1
+                return 1
             fi
         else
             rm $PID*
         fi
     else
         echo "No pid file found."
-        exit 1
+        return 1
     fi    
 }
 stop() {
     echo "Stoping hue... "
     stop_hue
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
     echo "Stoping oozie... "
     stop_oozie
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
     echo "Stoping database... "
     stop_database
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
 }
 start() {
     echo "Starting database... "
     start_database
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
     echo "Starting oozie... "
     start_oozie
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
     echo "Starting hue... "
     start_hue
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
 }
 init() {
     init_database
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
     start_database
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
     init_oozie
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
     init_hue
+    if [ $? -ne 0 ];then
+        return 1;
+    fi
 }
 status_hue() {
     if test -r $PID;then
         echo "hue running. pid=`cat $PID`"
+        return 0
     else
         echo "hue not running."
+        return 1
     fi
 }
 if [ $# -le 1 ];then
@@ -228,7 +244,6 @@ if [ $# -le 1 ];then
     	;;
         status)
     	status_hue
-        exit $?
     	;;
         init)
         init
