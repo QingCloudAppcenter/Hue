@@ -83,18 +83,6 @@ init_hue() {
     this_time=`date +%T`
     echo "$this_date $this_time LOG" >> $LOG_DIR/init.log
 
-    #create group if not exists  
-    egrep "^$HUE_GROUP" /etc/group >& /dev/null  
-    if [ $? -ne 0 ];then  
-        groupadd $HUE_GROUP
-        echo "create user group: $HUE_GROUP" >> $LOG_DIR/init.log
-    fi
-    #create user if not exists  
-    egrep "^$HUE_USER" /etc/passwd >& /dev/null  
-    if [ $? -ne 0 ];then  
-        useradd -g $HUE_GROUP $HUE_USER  
-        echo "create user: $HUE_USER" >> $LOG_DIR/init.log
-    fi
     chown -R $HUE_USER:$HUE_GROUP /data/hue
 
     #if database is not local, then init the database of hue

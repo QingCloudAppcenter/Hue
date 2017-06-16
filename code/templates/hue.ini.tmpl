@@ -1084,11 +1084,7 @@
 ###########################################################################
 
 [oozie]
-{{if ls (printf "/self/hosts/oozie-client/")}}
-# oozie_server_local=false
-{{else}}
-# oozie_server_local=true
-{{end}}
+
   # Location on local FS where the examples are stored.
   ## local_data_dir=..../examples
 
@@ -1337,7 +1333,7 @@
 [liboozie]
   # The URL where the Oozie service runs on. This is required in order for
   # users to submit jobs. Empty value disables the config check.
-  ## oozie_url=http://localhost:11000/oozie
+  oozie_url=http://localhost:11000/oozie
 
   # Requires FQDN in oozie_url if enabled
   ## security_enabled=false

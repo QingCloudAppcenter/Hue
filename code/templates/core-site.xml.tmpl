@@ -15,26 +15,37 @@
 -->
 
 <!-- Put site-specific property overrides in this file. -->
-
 <configuration>
+{{$hadoop_app_id := getv "/self/env/hadoop_app_id"}}
+{{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $hadoop_app_id}}
+  {{$string := split .Key "/"}}
+  {{$cluster_id := (index $string 2)}}
+  {{$env_cluster_id := getv "/self/env/hadoop_cluster_id"}}
+  {{if or (and (ne $env_cluster_id "") (eq $cluster_id $env_cluster_id) ) (and (eq $env_cluster_id "") (eq $i 0) )}}
+    {{range $node_name := lsdir (printf "/clusters/%s/hosts/hdfs-master/" $cluster_id)}}
    <property>
        <name>fs.defaultFS</name>
-       <value>hdfs://hdpn-azj8nlj9-hdfs-master:9000</value>
+       <value>hdfs://{{$node_name}}:9000</value>
    </property>
+    {{end}}
+    {{range $node_name := lsdir (printf "/clusters/%s/hosts/yarn-master/" $cluster_id)}}
    <property>
        <name>mapreduce.jobhistory.address</name>
-       <value>hdpn-awcz2031-yarn-master:10020</value>
+       <value>{{$node_name}}:10020</value>
    </property>
    <property>
        <name>mapreduce.jobhistory.webapp.address</name>
-       <value>hdpn-awcz2031-yarn-master:19888</value>
+       <value>{{$node_name}}:19888</value>
    </property>
+    {{end}}
+  {{end}}
+{{end}}
     <property>
-       <name>hadoop.proxyuser.hue.hosts</name>
+       <name>hadoop.proxyuser.yunify.hosts</name>
        <value>*</value>
     </property>
     <property>
-       <name>hadoop.proxyuser.hue.groups</name>
+       <name>hadoop.proxyuser.yunify.groups</name>
        <value>*</value>
     </property>
 <!--

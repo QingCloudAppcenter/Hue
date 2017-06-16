@@ -9,6 +9,8 @@ else
     ssh $server "rm /usr/local/app-agent-linux-amd64.tar.gz"
     ssh $server "cd /usr/local/app-agent-linux-amd64; ./install.sh"
     ssh $server "rm -r /usr/local/mysql/data"
+    ssh $server "groupadd yunify"
+    ssh $server "useradd -g yunify yunify"
     
     scp ../jar/mysql-connector-java-5.1.39-bin.jar $server:/usr/local/hive/lib/
     scp ../jar/S3/* $server:/usr/local/hadoop/share/hadoop/common/lib/
