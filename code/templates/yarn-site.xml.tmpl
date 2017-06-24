@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+    <property>
+        <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
+        <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    </property>
+{{$hadoop_app_id := getv "/self/env/hadoop_app_id"}}
+{{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $hadoop_app_id)}}
+  {{$string := split .Key "/"}}
+  {{$cluster_id := (index $string 2)}}
+  {{$env_cluster_id := getv "/self/env/hadoop_cluster_id"}}
+  {{if or (and (ne $env_cluster_id "") (eq $cluster_id $env_cluster_id) ) (and (eq $env_cluster_id "") (eq $i 0) )}}
+    {{range $node_name := lsdir (printf "/clusters/%s/hosts/yarn-master/" $cluster_id)}}
+    <property>
+        <name>yarn.resourcemanager.address</name>
+        <value>{{$node_name}}:8032</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.scheduler.address</name>
+        <value>{{$node_name}}:8030</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.resource-tracker.address</name>
+        <value>{{$node_name}}:8033</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.admin.address</name>
+        <value>{{$node_name}}:8031</value>
+    </property>
+    <property>
+        <name>yarn.resourcemanager.webapp.address</name>
+        <value>{{$node_name}}:8088</value>
+    </property>
+    {{end}}
+  {{end}}
+{{end}}
+</configuration>

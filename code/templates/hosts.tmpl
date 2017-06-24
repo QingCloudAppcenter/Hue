@@ -9,7 +9,7 @@
     {{end}}
 {{end}}
     # Hadoop Hosts
-{{range $i, gets "/clusters/*/cluster/app_id" | filter $hadoop_app_id}}
+{{range $i, gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $hadoop_app_id)}}
     {{$string := split .Key "/"}}
     {{$cluster_id := (index $string 2)}}
     {{printf "# Cluster = %s" $cluster_id}}
@@ -21,7 +21,7 @@
     {{end}}
 {{end}}
     # Spark Hosts
-{{range $i, gets "/clusters/*/cluster/app_id" | filter $spark_app_id}}
+{{range $i, gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $spark_app_id)}}
     {{$string := split .Key "/"}}
     {{$cluster_id := (index $string 2)}}
     {{printf "# Cluster = %s" $cluster_id}}

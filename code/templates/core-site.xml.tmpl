@@ -17,7 +17,7 @@
 <!-- Put site-specific property overrides in this file. -->
 <configuration>
 {{$hadoop_app_id := getv "/self/env/hadoop_app_id"}}
-{{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter $hadoop_app_id}}
+{{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $hadoop_app_id)}}
   {{$string := split .Key "/"}}
   {{$cluster_id := (index $string 2)}}
   {{$env_cluster_id := getv "/self/env/hadoop_cluster_id"}}
@@ -63,17 +63,18 @@
 	<value>com.hadoop.compression.lzo.LzoCodec</value>
    </property>
 -->
+{{if eq (getv "/self/env/QingStor") "true"}}
    <property>
      <name>fs.s3a.endpoint</name>
-     <value>s3.pek3a.qingstor.com</value>
+     <value>s3.{{getv "/self/cluster/zone"}}.qingstor.com</value>
    </property>
    <property>
      <name>fs.s3a.access.key</name>
-     <value>IKLQINFIKLQKWRMCJVLN</value>
+     <value>{{getv "/self/env/QingStor_access_key"}}</value>
    </property>
    <property>
      <name>fs.s3a.secret.key</name>
-     <value>HcTZxhXDTSktGKsDnIH9nGTprs1XIJUuSaM9Cu1x</value>
+     <value>{{getv "/self/env/QingStor_secret_key"}}</value>
    </property>
    <property>
      <name>fs.s3a.connection.ssl.enabled</name>
@@ -95,4 +96,5 @@
      <name>ipc.client.connect.max.retries.on.timeouts</name>
      <value>3</value>
    </property>
+{{end}}
 </configuration>
