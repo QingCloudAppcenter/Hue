@@ -87,8 +87,33 @@
         "description": "Hive service properties",
         "type": "array",
         "properties": [{
-            "key": "secret_key",
-            "label": "secret_key",
+            "key": "QingStor",
+            "label": "QingStor",
+            "description": "Whether to use QingStor",
+            "type": "boolean",
+            "default": false,
+            "range": [true,false],
+            "required":"yes"
+        },
+        {
+            "key": "QingStor_access_key",
+            "label": "QingStor_access_key",
+            "description": "The QingStor access_key",
+            "type": "string",
+            "default": "",
+            "required":"no"
+        },
+        {
+            "key": "QingStor_secret_key",
+            "label": "QingStor_secret_key",
+            "description": "The QingStor secret_key",
+            "type": "string",
+            "default": "",
+            "required":"no"
+        },
+        {
+            "key": "Hue_secret_key",
+            "label": "Hue_secret_key",
             "description": "This is used for secure hashing in the session store",
             "type": "string",
             "default": "aszuda123fnkqwe12315urasdf1231ls98ajs12312302",
@@ -99,7 +124,6 @@
             "label": "hadoop_app_id",
             "description": "The hadoop app id in use, the default value is set of QingCloud hadoop app id",
             "type": "string",
-            "range": ["app-53ajfmsy", "none"],
             "default": "app-53ajfmsy",
             "required":"no"
         },
@@ -116,7 +140,6 @@
             "label": "zookeeper_app_id",
             "description": "The zookeeper app id in use, the default value is set of QingCloud zookeeper app id",
             "type": "string",
-            "range": ["app-tg3lbp0a", "none"],
             "default": "app-tg3lbp0a",
             "required":"no"
         },
@@ -125,8 +148,7 @@
             "label": "spark_app_id",
             "description": "The spark app id in use, the default value is set of QingCloud spark app id",
             "type": "string",
-            "range": ["none"],
-            "default": "none",
+            "default": "",
             "required":"no"
         },
         {
@@ -142,7 +164,6 @@
             "label": "hive_app_id",
             "description": "The hive app id in use, the default value is set of QingCloud hive app id",
             "type": "string",
-            "range": ["app-98fu0tes", "none"],
             "default": "app-98fu0tes",
             "required":"no"
         },
@@ -159,8 +180,7 @@
             "label": "hbase_app_id",
             "description": "The hbase app id in use, the default value is set of QingCloud hbase app id",
             "type": "string",
-            "range": ["none"],
-            "default": "none",
+            "default": "",
             "required":"no"
         },
         {

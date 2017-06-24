@@ -7,7 +7,7 @@
             "container": {
                "type": "kvm",
                "zone": "pek3a",
-               "image": "img-t69cdyzw"
+               "image": "img-ijqapcow"
             },
             "count": {{cluster.hue-server.count}},
             "cpu": {{cluster.hue-server.cpu}},
@@ -43,7 +43,10 @@
         }],
         "metadata_root_access": true,
         "env": {
-            "secret_key": {{env.secret_key}},
+            "QingStor": {{env.QingStor}},
+            "QingStor_access_key": {{env.QingStor_access_key}},
+            "QingStor_secret_key": {{env.QingStor_secret_key}},
+            "Hue_secret_key": {{env.Hue_secret_key}},
             "hadoop_app_id": {{env.hadoop_app_id}},
             "hadoop_cluster_id": {{env.hadoop_cluster_id}},
             "zookeeper_app_id": {{env.zookeeper_app_id}},
