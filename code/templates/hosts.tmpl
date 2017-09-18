@@ -1,5 +1,4 @@
 {{$hadoop_app_id := getv "/self/env/hadoop_app_id"}}
-{{$spark_app_id := getv "/self/env/spark_app_id"}}
     {{getv "/self/host/ip"}} localhost
     # Hue Hosts
 {{range $role := lsdir "/self/hosts"}}
@@ -10,18 +9,6 @@
 {{end}}
     # Hadoop Hosts
 {{range $i, gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $hadoop_app_id)}}
-    {{$string := split .Key "/"}}
-    {{$cluster_id := (index $string 2)}}
-    {{printf "# Cluster = %s" $cluster_id}}
-    {{range $role := lsdir (printf "/clusters/%s/hosts/" $cluster_id)}}
-    {{printf "# Role = %s" $role}}
-        {{range $dir := lsdir (printf "/clusters/%s/hosts/%s/" $cluster_id $role)}}{{$ip := printf "/clusters/%s/hosts/%s/%s/ip" $cluster_id $role $dir}}
-    {{getv $ip}} {{$dir}}
-        {{end}}
-    {{end}}
-{{end}}
-    # Spark Hosts
-{{range $i, gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $spark_app_id)}}
     {{$string := split .Key "/"}}
     {{$cluster_id := (index $string 2)}}
     {{printf "# Cluster = %s" $cluster_id}}

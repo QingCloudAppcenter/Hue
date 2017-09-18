@@ -1,6 +1,5 @@
 {{$hadoop_app_id := getv "/self/env/hadoop_app_id"}}
 {{$zookeeper_app_id := getv "/self/env/zookeeper_app_id"}}
-{{$spark_app_id := getv "/self/env/spark_app_id"}}
 {{$hive_app_id := getv "/self/env/hive_app_id"}}
 {{$hbase_app_id := getv "/self/env/hbase_app_id"}}
 # Hue configuration file
@@ -164,7 +163,7 @@
   # Comma separated list of apps to not load at server startup.
   # e.g.: pig,zookeeper
 
-  app_blacklist=pig,impala,solr,sqoop{{if len (gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $zookeeper_app_id))}}{{else}}{{printf ",zookeeper"}}{{end}}{{if len (gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $hbase_app_id))}}{{else}}{{printf ",hbase"}}{{end}}{{if (gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $hadoop_app_id))}}{{else}}{{printf ",hadoop"}}{{end}}{{if len (gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $spark_app_id))}}{{else}}{{printf ",spark"}}{{end}}
+  app_blacklist=pig,impala,solr,sqoop{{if len (gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $zookeeper_app_id))}}{{else}}{{printf ",zookeeper"}}{{end}}{{if len (gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $hbase_app_id))}}{{else}}{{printf ",hbase"}}{{end}}{{if (gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $hadoop_app_id))}}{{else}}{{printf ",hadoop"}}{{end}}{{if len (gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $hadoop_app_id))}}{{else}}{{printf ",spark"}}{{end}}
 
   # Choose whether to show the new SQL editor.
   ## use_new_editor=true
@@ -681,7 +680,7 @@
     #   name=SparkSql
     #   interface=hiveserver2
 
-{{if len (gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $spark_app_id))}}
+{{if len (gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $hadoop_app_id))}}
     [[[spark]]]
       name=Scala
       interface=livy
@@ -1099,30 +1098,22 @@
 ###########################################################################
 
 [spark]
-{{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $spark_app_id)}}
+{{range $i, $buff := gets "/clusters/*/cluster/app_id" | filter (printf "^%s$" $hadoop_app_id)}}
   {{$string := split .Key "/"}}
   {{$cluster_id := (index $string 2)}}
   {{if eq $i 0}}
-    {{if exists (printf "/clusters/%s/cluster/endpoints/livy" $cluster_id)}}
-      {{$port := getv (printf "/clusters/%s/cluster/endpoints/livy/port" $cluster_id)}}
-      {{range $i, $host := ls (printf "/clusters/%s/spark-master/hosts" $cluster_id)}}
-        {{if eq $i 0}}
-          {{$ip := getv (printf "/clusters/%s/spark-master/hosts/%s/ip" $cluster_id $host)}}
-  livy_server_host={{$ip}}
+      {{$port := getv (printf "/clusters/%s/cluster/endpoints/livy.port/port" $cluster_id) "8998"}} 
+      {{range $node_name := lsdir (printf "/clusters/%s/hosts/yarn-master/" $cluster_id)}}
+        {{$yarn_ip := getv (printf "/clusters/%s/hosts/yarn-master/%s/ip" $cluster_id $node_name)}}
+  # Host address of the Livy Server.
+  livy_server_host={{$yarn_ip}}
+  # Port of the Livy Server.
   livy_server_port={{$port}}
-        {{end}}
       {{end}}
-    {{end}}
   {{end}}
 {{end}}
-  # Host address of the Livy Server.
-  ## livy_server_host=localhost
-
-  # Port of the Livy Server.
-  ## livy_server_port=8998
-
   # Configure Livy to start in local 'process' mode, or 'yarn' workers.
-  ## livy_server_session_kind=yarn
+  livy_server_session_kind=yarn
 
   # Host of the Sql Server
   ## sql_server_host=localhost

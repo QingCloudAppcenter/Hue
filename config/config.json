@@ -121,16 +121,16 @@
         },
         {
             "key": "hadoop_app_id",
-            "label": "hadoop_app_id",
-            "description": "The hadoop app id in use, the default value is set of QingCloud hadoop app id",
+            "label": "SparkMR_app_id",
+            "description": "The SparkMR app id in use, the default value is SparkMR on QingCloud app id",
             "type": "string",
-            "default": "app-53ajfmsy",
+            "default": "app-6iuoe9qs",
             "required":"no"
         },
         {
             "key": "hadoop_cluster_id",
-            "label": "hadoop_cluster_id",
-            "description": "The default hadoop cluster id in hue. if it is blank, it will choose the first hadoop_app_id cluster created in vxnet",
+            "label": "SparkMR_cluster_id",
+            "description": "The default SparkMR cluster id in hue. if it is blank, it will choose the first SparkMR cluster created in vxnet",
             "type": "string",
             "default": "",
             "required":"no"
@@ -141,22 +141,6 @@
             "description": "The zookeeper app id in use, the default value is set of QingCloud zookeeper app id",
             "type": "string",
             "default": "app-tg3lbp0a",
-            "required":"no"
-        },
-        {
-            "key": "spark_app_id",
-            "label": "spark_app_id",
-            "description": "The spark app id in use, the default value is set of QingCloud spark app id",
-            "type": "string",
-            "default": "",
-            "required":"no"
-        },
-        {
-            "key": "spark_cluster_id",
-            "label": "spark_cluster_id",
-            "description": "The default spark cluster id in hue. if it is blank, it will choose the first spark_app_id cluster created in vxnet",
-            "type": "string",
-            "default": "",
             "required":"no"
         },
         {
