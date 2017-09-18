@@ -7,7 +7,7 @@
             "container": {
                "type": "kvm",
                "zone": "pek3a",
-               "image": "img-ijqapcow"
+               "image": "img-jiglqoee"
             },
             "count": {{cluster.hue-server.count}},
             "cpu": {{cluster.hue-server.cpu}},
@@ -35,8 +35,8 @@
                 "interval_sec": 60,
                 "timeout_sec": 10,
                 "action_timeout_sec": 30,
-                "healthy_threshold": 3,
-                "unhealthy_threshold": 3,
+                "healthy_threshold": 2,
+                "unhealthy_threshold": 2,
                 "check_cmd": "/usr/local/hue/hue_shell.sh status",
                 "action_cmd": "/usr/local/hue/hue_shell.sh start"
             }
@@ -50,8 +50,6 @@
             "hadoop_app_id": {{env.hadoop_app_id}},
             "hadoop_cluster_id": {{env.hadoop_cluster_id}},
             "zookeeper_app_id": {{env.zookeeper_app_id}},
-            "spark_app_id": {{env.spark_app_id}},
-            "spark_cluster_id": {{env.spark_cluster_id}},
             "hive_app_id": {{env.hive_app_id}},
             "hive_cluster_id": {{env.hive_cluster_id}},
             "hbase_app_id": {{env.hbase_app_id}},
